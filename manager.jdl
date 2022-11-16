@@ -1,0 +1,37 @@
+
+entity Groups {
+    groupName String
+}
+
+entity Customer (customer) { 
+}
+
+entity Task{
+    body String 
+    image ImageBlob
+    caption String
+}
+
+entity Comments{
+    message String
+}
+
+relationship OneToOne{
+	Customer{user} to User
+}
+
+relationship ManyToOne{
+	Customer{group} to Groups
+}
+
+relationship OneToMany{
+	Task{comments} to Comments
+}
+
+relationship ManyToMany{
+	Task{groups} to Groups{tasks} 
+}
+
+
+service all with serviceImpl
+dto * with mapstruct

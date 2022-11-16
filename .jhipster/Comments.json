@@ -1,0 +1,27 @@
+{
+  "applications": "*",
+  "changelogDate": "20221116092902",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "comments",
+  "fields": [
+    {
+      "fieldName": "message",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Comments",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "task",
+      "otherEntityRelationshipName": "comments",
+      "relationshipName": "task",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "serviceImpl"
+}

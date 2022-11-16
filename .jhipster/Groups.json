@@ -1,0 +1,28 @@
+{
+  "applications": "*",
+  "changelogDate": "20221116092859",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "groups",
+  "fields": [
+    {
+      "fieldName": "groupName",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Groups",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "task",
+      "otherEntityRelationshipName": "groups",
+      "ownerSide": false,
+      "relationshipName": "tasks",
+      "relationshipType": "many-to-many"
+    }
+  ],
+  "service": "serviceImpl"
+}
