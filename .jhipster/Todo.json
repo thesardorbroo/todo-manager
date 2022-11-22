@@ -1,0 +1,33 @@
+{
+  "applications": "*",
+  "changelogDate": "20221116131213",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "todo",
+  "fields": [
+    {
+      "fieldName": "createdAt",
+      "fieldType": "LocalDate"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Todo",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "customer",
+      "otherEntityRelationshipName": "todo",
+      "relationshipName": "customers",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "task",
+      "otherEntityRelationshipName": "todo",
+      "relationshipName": "tasks",
+      "relationshipType": "one-to-many"
+    }
+  ],
+  "service": "serviceImpl"
+}
