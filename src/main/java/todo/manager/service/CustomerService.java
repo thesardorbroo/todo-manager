@@ -3,6 +3,7 @@ package todo.manager.service;
 import java.util.List;
 import java.util.Optional;
 import todo.manager.service.dto.CustomerDTO;
+import todo.manager.service.dto.ResponseDTO;
 
 /**
  * Service Interface for managing {@link todo.manager.domain.Customer}.
@@ -14,7 +15,7 @@ public interface CustomerService {
      * @param customerDTO the entity to save.
      * @return the persisted entity.
      */
-    CustomerDTO save(CustomerDTO customerDTO);
+    ResponseDTO<CustomerDTO> save(CustomerDTO customerDTO);
 
     /**
      * Updates a customer.
@@ -55,4 +56,6 @@ public interface CustomerService {
 
     Optional<CustomerDTO> findOneByUserLogin(String login);
     void delete(Long id);
+
+    List<CustomerDTO> getCustomerByGroupId(Long groupId);
 }

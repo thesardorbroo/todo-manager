@@ -15,6 +15,9 @@ spring:
       auto-commit: false
       poolName: Hikari
       maximum-pool-size: 1
+    url: jdbc:postgresql://localhost:5432/manager
+    username: postgres
+    password:
   jpa:
     database-platform: tech.jhipster.domain.util.FixedPostgreSQL10Dialect
     open-in-view: false
@@ -32,3 +35,4 @@ spring:
       hibernate.hbm2ddl.auto: validate
       hibernate.jdbc.time_zone: UTC
       hibernate.query.fail_on_pagination_over_collection_fetch: true
+    show-sql: true

@@ -2,6 +2,7 @@ package todo.manager.service.impl;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -9,20 +10,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import todo.manager.domain.Customer;
-import todo.manager.domain.Groups;
 import todo.manager.domain.User;
 import todo.manager.repository.CustomerRepository;
 import todo.manager.service.CustomerService;
 import todo.manager.service.GroupsService;
 import todo.manager.service.UserService;
-import todo.manager.service.dto.AdminUserDTO;
-import todo.manager.service.dto.CustomerDTO;
-import todo.manager.service.dto.GroupsDTO;
-import todo.manager.service.dto.UserDTO;
+import todo.manager.service.dto.*;
 import todo.manager.service.mapper.CustomerMapper;
-import todo.manager.service.mapper.UserMapper;
+import todo.manager.service.mapper.impl.MapperCustomerImpl;
 import todo.manager.service.mapper.impl.MapperGroupsImpl;
 import todo.manager.service.mapper.impl.MapperUserImpl;
+import todo.manager.service.validation.GroupValidator;
+import todo.manager.web.rest.errors.GroupsExceptions;
 
 /**
  * Service Implementation for managing {@link Customer}.
@@ -41,42 +40,48 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final GroupsService groupsService;
 
+    private final GroupValidator groupValidator;
+
     public CustomerServiceImpl(
         CustomerRepository customerRepository,
         CustomerMapper customerMapper,
         UserService userService,
-        GroupsService groupsService
+        GroupsService groupsService,
+        GroupValidator groupValidator
     ) {
         this.customerRepository = customerRepository;
         this.customerMapper = customerMapper;
         this.userService = userService;
         this.groupsService = groupsService;
+        this.groupValidator = groupValidator;
     }
 
     @Override
-    public CustomerDTO save(CustomerDTO customerDTO) {
+    public ResponseDTO<CustomerDTO> save(CustomerDTO customerDTO) {
         log.debug("Request to save Customer : {}", customerDTO);
-        AdminUserDTO adminUserDTO = MapperUserImpl.userDtoToAdminDto(customerDTO.getUser());
 
-        User user = userService.registerUser(adminUserDTO, customerDTO.getUser().getPassword());
-
-        customerDTO.getUser().setId(user.getId());
-        customerDTO.getUser().setLogin(user.getLogin());
-
-        Optional<GroupsDTO> optional = groupsService.findOne(customerDTO.getGroup().getId());
-        if (optional.isEmpty()) {
-            GroupsDTO groupsDTO = new GroupsDTO();
-            groupsDTO.setId(customerDTO.getId());
-            if (customerDTO.getGroup().getGroupName() != null) {
-                groupsDTO.setGroupName(customerDTO.getGroup().getGroupName());
-                groupsDTO = groupsService.save(groupsDTO);
-                customerDTO.setGroup(groupsDTO);
-            }
+        ResponseDTO<CustomerDTO> responseDTO = check(customerDTO.getUser());
+        if (responseDTO != null) {
+            return responseDTO;
         }
+        responseDTO = check(customerDTO.getGroup());
+        if (responseDTO != null) {
+            return responseDTO;
+        }
+
+        UserDTO userDTO = findUser(customerDTO.getUser());
+        GroupsDTO groupsDTO = findGroup(customerDTO.getGroup());
+        if (groupsDTO == null) {
+            return new ResponseDTO<>(false, "Groups is not found!", null);
+        }
+        customerDTO.setUser(userDTO);
+        customerDTO.setGroup(groupsDTO);
 
         Customer customer = customerMapper.toEntity(customerDTO);
         customer = customerRepository.save(customer);
-        return customerMapper.toDto(customer);
+        customerDTO = MapperCustomerImpl.toDTO(customer);
+
+        return new ResponseDTO<>(true, "OK", customerDTO);
     }
 
     @Override
@@ -139,5 +144,70 @@ public class CustomerServiceImpl implements CustomerService {
     public void delete(Long id) {
         log.debug("Request to delete Customer : {}", id);
         customerRepository.deleteById(id);
+    }
+
+    @Override
+    public List<CustomerDTO> getCustomerByGroupId(Long groupId) {
+        Optional<List<Customer>> optional = customerRepository.findAllByGroupId(groupId);
+
+        List<CustomerDTO> customerDTOS = optional.get().stream().map(customerMapper::toDto).collect(Collectors.toList());
+        return customerDTOS;
+    }
+
+    private ResponseDTO<CustomerDTO> check(UserDTO userDTO) {
+        String validationResult = checkUser(userDTO);
+        if (!validationResult.equals("OK")) {
+            return new ResponseDTO<>(false, validationResult, null);
+        }
+        return null;
+    }
+
+    private ResponseDTO<CustomerDTO> check(GroupsDTO groupsDTO) {
+        List<String> results = List.of("OK", "Group is already exists!");
+        String validationResult = groupValidator.newGroup(groupsDTO);
+        if (!results.contains(validationResult)) {
+            return new ResponseDTO<>(false, validationResult, null);
+        }
+        return null;
+    }
+
+    private UserDTO findUser(UserDTO userDTO) {
+        Optional<User> optional = null;
+
+        String login = String.valueOf(userDTO.getLogin());
+        optional = userService.getUserWithAuthoritiesByLogin(login);
+
+        User user = null;
+        if (optional.isEmpty()) {
+            AdminUserDTO adminUserDTO = MapperUserImpl.userDtoToAdminDto(userDTO);
+            user = userService.registerUser(adminUserDTO, userDTO.getPassword());
+        } else {
+            user = optional.get();
+        }
+        userDTO.setId(user.getId());
+        return userDTO;
+    }
+
+    private String checkUser(UserDTO userDTO) {
+        if (userDTO == null) {
+            return "UserDTO is null!";
+        } else if (userDTO.getLogin() == null) {
+            return "Login of UserDTO is null!";
+        } else if (userDTO.getLogin().trim().isEmpty()) {
+            return "Login of UserDTO is empty!";
+        }
+        return "OK";
+    }
+
+    public GroupsDTO findGroup(GroupsDTO groupsDTO) {
+        Optional<GroupsDTO> optional = groupsService.findOne(groupsDTO.getId());
+        if (optional.isEmpty()) {
+            ResponseDTO<GroupsDTO> responseDTO = groupsService.findByGroupName(groupsDTO.getGroupName());
+            if (responseDTO.getSuccess() && responseDTO.getData() != null) {
+                return responseDTO.getData();
+            }
+            return null;
+        }
+        return optional.get();
     }
 }

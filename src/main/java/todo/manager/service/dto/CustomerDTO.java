@@ -1,5 +1,9 @@
 package todo.manager.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -7,12 +11,17 @@ import java.util.Objects;
  * A DTO for the {@link todo.manager.domain.Customer} entity.
  */
 @SuppressWarnings("common-java:DuplicatedBlocks")
+@JsonPropertyOrder(value = { "id", "user", "group" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomerDTO implements Serializable {
 
+    @JsonProperty("id")
     private Long id;
 
+    @JsonProperty("user")
     private UserDTO user;
 
+    @JsonProperty("group")
     private GroupsDTO group;
 
     public Long getId() {

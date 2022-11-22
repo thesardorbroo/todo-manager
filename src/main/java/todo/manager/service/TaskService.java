@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import todo.manager.service.dto.ResponseDTO;
 import todo.manager.service.dto.TaskDTO;
 
 /**
@@ -16,7 +17,7 @@ public interface TaskService {
      * @param taskDTO the entity to save.
      * @return the persisted entity.
      */
-    TaskDTO save(TaskDTO taskDTO);
+    ResponseDTO<TaskDTO> save(TaskDTO taskDTO);
 
     /**
      * Updates a task.
@@ -63,4 +64,10 @@ public interface TaskService {
      * @param id the id of the entity.
      */
     void delete(Long id);
+
+    List<TaskDTO> getTasksByGroupId(Long groupId);
+
+    List<TaskDTO> completedTasks(Long customerId);
+
+    List<TaskDTO> notCompletedTasks(Long customerId);
 }

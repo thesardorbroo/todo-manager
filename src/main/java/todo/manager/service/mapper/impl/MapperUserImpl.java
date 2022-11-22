@@ -9,6 +9,7 @@ public class MapperUserImpl {
     public static AdminUserDTO userDtoToAdminDto(UserDTO userDTO) {
         AdminUserDTO adminUserDTO = new AdminUserDTO();
 
+        adminUserDTO.setId(userDTO.getId());
         adminUserDTO.setLogin(userDTO.getLogin());
         adminUserDTO.setFirstName(userDTO.getFirstName());
         adminUserDTO.setLastName(userDTO.getLastName());

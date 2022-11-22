@@ -15,6 +15,7 @@ import todo.manager.service.MailService;
 import todo.manager.service.UserService;
 import todo.manager.service.dto.AdminUserDTO;
 import todo.manager.service.dto.PasswordChangeDTO;
+import todo.manager.service.dto.ResponseDTO;
 import todo.manager.web.rest.errors.*;
 import todo.manager.web.rest.vm.KeyAndPasswordVM;
 import todo.manager.web.rest.vm.ManagedUserVM;
@@ -57,12 +58,13 @@ public class AccountResource {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
+    public ResponseDTO<User> registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
         if (isPasswordLengthInvalid(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
-        mailService.sendActivationEmail(user);
+        return new ResponseDTO<>(true, "OK", user);
+        //        mailService.sendActivationEmail(user);
     }
 
     /**
@@ -88,7 +90,9 @@ public class AccountResource {
     @GetMapping("/authenticate")
     public String isAuthenticated(HttpServletRequest request) {
         log.debug("REST request to check if the current user is authenticated");
-        return request.getRemoteUser();
+        String response = request.getRemoteUser();
+        log.info("Response: {}", response);
+        return response;
     }
 
     /**

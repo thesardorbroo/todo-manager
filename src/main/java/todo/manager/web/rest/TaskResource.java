@@ -9,11 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import todo.manager.repository.TaskRepository;
+import todo.manager.security.AuthoritiesConstants;
 import todo.manager.service.TaskService;
+import todo.manager.service.dto.ResponseDTO;
 import todo.manager.service.dto.TaskDTO;
 import todo.manager.web.rest.errors.BadRequestAlertException;
 
@@ -48,16 +51,14 @@ public class TaskResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/tasks")
-    public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) throws URISyntaxException {
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseDTO<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) throws URISyntaxException {
         log.debug("REST request to save Task : {}", taskDTO);
         if (taskDTO.getId() != null) {
-            throw new BadRequestAlertException("A new task cannot already have an ID", ENTITY_NAME, "idexists");
+            return new ResponseDTO<>(false, "A new task cannot already have an ID", null);
         }
-        TaskDTO result = taskService.save(taskDTO);
-        return ResponseEntity
-            .created(new URI("/api/tasks/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+        ResponseDTO<TaskDTO> response = taskService.save(taskDTO);
+        return response;
     }
 
     /**

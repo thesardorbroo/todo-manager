@@ -17,6 +17,7 @@ import todo.manager.repository.GroupsRepository;
 import todo.manager.security.AuthoritiesConstants;
 import todo.manager.service.GroupsService;
 import todo.manager.service.dto.GroupsDTO;
+import todo.manager.service.dto.ResponseDTO;
 import todo.manager.web.rest.errors.BadRequestAlertException;
 
 /**
@@ -51,15 +52,15 @@ public class GroupsResource {
      */
     @PostMapping("/groups")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<GroupsDTO> createGroups(@RequestBody GroupsDTO groupsDTO) throws URISyntaxException {
+    public ResponseEntity<ResponseDTO<GroupsDTO>> createGroups(@RequestBody GroupsDTO groupsDTO) throws URISyntaxException {
         log.debug("REST request to save Groups : {}", groupsDTO);
         if (groupsDTO.getId() != null) {
             throw new BadRequestAlertException("A new groups cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        GroupsDTO result = groupsService.save(groupsDTO);
+        ResponseDTO<GroupsDTO> result = groupsService.save(groupsDTO);
         return ResponseEntity
-            .created(new URI("/api/groups/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .created(new URI("/api/groups/" + result.getData().getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getData().getId().toString()))
             .body(result);
     }
 

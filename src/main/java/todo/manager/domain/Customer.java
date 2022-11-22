@@ -2,6 +2,7 @@ package todo.manager.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.util.Set;
 import javax.persistence.*;
 
 /**
@@ -27,6 +28,9 @@ public class Customer implements Serializable {
     @ManyToOne
     @JsonIgnoreProperties(value = { "tasks" }, allowSetters = true)
     private Groups group;
+
+    @OneToMany(mappedBy = "customer")
+    private Set<Todo> todo;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -62,6 +66,14 @@ public class Customer implements Serializable {
 
     public void setGroup(Groups groups) {
         this.group = groups;
+    }
+
+    public Set<Todo> getTodo() {
+        return todo;
+    }
+
+    public void setTodo(Set<Todo> todo) {
+        this.todo = todo;
     }
 
     public Customer group(Groups groups) {

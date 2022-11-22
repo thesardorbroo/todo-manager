@@ -72,6 +72,14 @@ public class UserService {
             });
     }
 
+    public Optional<User> getById(Long id) {
+        Optional<User> optional = userRepository.findById(id);
+        if (optional.isEmpty()) {
+            return optional;
+        }
+        return optional;
+    }
+
     public Optional<User> completePasswordReset(String newPassword, String key) {
         log.debug("Reset user password for reset key {}", key);
         return userRepository
@@ -227,6 +235,7 @@ public class UserService {
         userRepository
             .findOneByLogin(login)
             .ifPresent(user -> {
+                //                userRepository.deleteFromUserAuthority(user.getId());
                 userRepository.delete(user);
                 this.clearUserCaches(user);
                 log.debug("Deleted User: {}", user);

@@ -17,6 +17,20 @@ import todo.manager.domain.Task;
  */
 @Repository
 public interface TaskRepository extends TaskRepositoryWithBagRelationships, JpaRepository<Task, Long> {
+    @Query(
+        value = "SELECT * FROM task t WHERE t.id in (SELECT r.task_id FROM rel_task__groups r WHERE groups_id = :groupId )",
+        nativeQuery = true
+    )
+    List<Task> findAllByGroups(@Param("groupId") Long groupId);
+
+    @Query(value = "SELECT t FROM Task t WHERE t.id IN (SELECT td.task.id FROM Todo td WHERE td.customer.id = :customerId)")
+    List<Task> getCompletedTasks(@Param("customerId") Long customerId);
+
+    @Query(value = "SELECT t FROM Task t WHERE t.id NOT IN (SELECT td.task.id FROM Todo td WHERE td.customer.id = :customerId)")
+    List<Task> getNotCompletedTasks(@Param("customerId") Long customerId);
+
+    void deleteById(Long id);
+
     default Optional<Task> findOneWithEagerRelationships(Long id) {
         return this.fetchBagRelationships(this.findById(id));
     }

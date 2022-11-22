@@ -3,6 +3,7 @@ package todo.manager.service;
 import java.util.List;
 import java.util.Optional;
 import todo.manager.service.dto.GroupsDTO;
+import todo.manager.service.dto.ResponseDTO;
 
 /**
  * Service Interface for managing {@link todo.manager.domain.Groups}.
@@ -14,7 +15,7 @@ public interface GroupsService {
      * @param groupsDTO the entity to save.
      * @return the persisted entity.
      */
-    GroupsDTO save(GroupsDTO groupsDTO);
+    ResponseDTO<GroupsDTO> save(GroupsDTO groupsDTO);
 
     /**
      * Updates a groups.
@@ -46,6 +47,8 @@ public interface GroupsService {
      * @return the entity.
      */
     Optional<GroupsDTO> findOne(Long id);
+
+    ResponseDTO<GroupsDTO> findByGroupName(String groupName);
 
     /**
      * Delete the "id" groups.

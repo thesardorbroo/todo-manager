@@ -1,5 +1,6 @@
 package todo.manager.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -14,4 +15,8 @@ import todo.manager.domain.Customer;
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT c FROM Customer c WHERE c.user.login = :login")
     Optional<Customer> getByUserLogin(@Param("login") String login);
+
+    Optional<List<Customer>> findAllByGroupId(Long groupId);
+
+    void deleteByGroupId(Long id);
 }

@@ -1,20 +1,41 @@
 package todo.manager.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 /**
  * A DTO for the {@link todo.manager.domain.Groups} entity.
  */
 @SuppressWarnings("common-java:DuplicatedBlocks")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonPropertyOrder(value = { "id", "groupName", "tasks" })
 public class GroupsDTO implements Serializable {
 
+    @JsonProperty("id")
     private Long id;
 
+    @NotNull
+    @NotEmpty
+    @JsonProperty("groupName")
     private String groupName;
 
+    @JsonProperty("tasks")
     private Set<TaskDTO> tasks;
+
+    public GroupsDTO() {}
+
+    public GroupsDTO(Long id, String groupName, Set<TaskDTO> tasks) {
+        this.id = id;
+        this.groupName = groupName;
+        this.tasks = tasks;
+    }
 
     public Long getId() {
         return id;

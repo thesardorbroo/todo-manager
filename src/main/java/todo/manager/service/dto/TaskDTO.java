@@ -1,5 +1,8 @@
 package todo.manager.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
@@ -10,18 +13,27 @@ import javax.persistence.Lob;
  * A DTO for the {@link todo.manager.domain.Task} entity.
  */
 @SuppressWarnings("common-java:DuplicatedBlocks")
+@JsonPropertyOrder(value = { "id", "body", "image", "imageContentType", "caption", "groups" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TaskDTO implements Serializable {
 
+    @JsonProperty("id")
     private Long id;
 
+    @JsonProperty("body")
     private String body;
 
     @Lob
+    @JsonProperty("image")
     private byte[] image;
 
+    @JsonProperty("imageContentType")
     private String imageContentType;
+
+    @JsonProperty("caption")
     private String caption;
 
+    @JsonProperty("groups")
     private Set<GroupsDTO> groups = new HashSet<>();
 
     public Long getId() {

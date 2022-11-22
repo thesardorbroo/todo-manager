@@ -44,6 +44,9 @@ public class Task implements Serializable {
     //    @JsonIgnoreProperties(value = { "tasks" }, allowSetters = true)
     private Set<Groups> groups = new HashSet<>();
 
+    @OneToMany(mappedBy = "task")
+    private Set<Todo> todo;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public Long getId() {
@@ -148,6 +151,14 @@ public class Task implements Serializable {
 
     public void setGroups(Set<Groups> groups) {
         this.groups = groups;
+    }
+
+    public Set<Todo> getTodo() {
+        return todo;
+    }
+
+    public void setTodo(Set<Todo> todo) {
+        this.todo = todo;
     }
 
     public Task groups(Set<Groups> groups) {

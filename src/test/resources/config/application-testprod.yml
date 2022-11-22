@@ -15,6 +15,10 @@ spring:
       poolName: Hikari
       auto-commit: false
       maximum-pool-size: 1
+    url: jdbc:postgresql://localhost:5432/manager
+    username: postgres
+    password:
+
   jpa:
     database-platform: tech.jhipster.domain.util.FixedPostgreSQL10Dialect
     open-in-view: false

@@ -1,27 +1,37 @@
 package todo.manager.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import todo.manager.domain.User;
 
 /**
  * A DTO representing a user, with only the public attributes.
  */
+@JsonPropertyOrder(value = { "id", "login", "firstName", "lastName", "email", "password", "langKey" })
 public class UserDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @JsonProperty("id")
     private Long id;
 
+    @JsonProperty("login")
     private String login;
 
+    @JsonProperty("firstName")
     private String firstName;
 
+    @JsonProperty("lastName")
     private String lastName;
 
+    @JsonProperty("email")
     private String email;
 
+    @JsonProperty("password")
     private String password;
 
+    @JsonProperty("langKey")
     private String langKey;
 
     public UserDTO() {

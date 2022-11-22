@@ -12,9 +12,10 @@ import todo.manager.domain.Groups;
 import todo.manager.repository.GroupsRepository;
 import todo.manager.service.GroupsService;
 import todo.manager.service.dto.GroupsDTO;
+import todo.manager.service.dto.ResponseDTO;
 import todo.manager.service.mapper.GroupsMapper;
-import todo.manager.service.mapper.GroupsMapperImpl;
 import todo.manager.service.mapper.impl.MapperGroupsImpl;
+import todo.manager.service.validation.GroupValidator;
 
 /**
  * Service Implementation for managing {@link Groups}.
@@ -27,19 +28,33 @@ public class GroupsServiceImpl implements GroupsService {
 
     private final GroupsRepository groupsRepository;
 
+    private final GroupValidator groupValidator;
     private final GroupsMapper groupsMapper;
 
-    public GroupsServiceImpl(GroupsRepository groupsRepository, GroupsMapper groupsMapper) {
+    public GroupsServiceImpl(GroupsRepository groupsRepository, GroupValidator groupValidator, GroupsMapper groupsMapper) {
         this.groupsRepository = groupsRepository;
+        this.groupValidator = groupValidator;
         this.groupsMapper = groupsMapper;
     }
 
     @Override
-    public GroupsDTO save(GroupsDTO groupsDTO) {
+    public ResponseDTO<GroupsDTO> save(GroupsDTO groupsDTO) {
         log.debug("Request to save Groups : {}", groupsDTO);
+        String validationResult = groupValidator.newGroup(groupsDTO);
+
+        if (!validationResult.equals("OK")) {
+            return new ResponseDTO<>(false, validationResult, null);
+        }
+
         Groups groups = groupsMapper.toEntity(groupsDTO);
         groups = groupsRepository.save(groups);
-        return groupsMapper.toDto(groups);
+        groupsDTO = groupsMapper.toDto(groups);
+        ResponseDTO<GroupsDTO> responseDTO = new ResponseDTO();
+        responseDTO.setData(groupsDTO);
+        responseDTO.setSuccess(true);
+        responseDTO.setMessage("OK");
+
+        return responseDTO;
     }
 
     @Override
@@ -77,12 +92,23 @@ public class GroupsServiceImpl implements GroupsService {
     @Transactional(readOnly = true)
     public Optional<GroupsDTO> findOne(Long id) {
         log.debug("Request to get Groups : {}", id);
-        return groupsRepository.findById(id).map(groupsMapper::toDto);
+        return groupsRepository.findById(id).map(MapperGroupsImpl::toDto);
+    }
+
+    @Override
+    public ResponseDTO<GroupsDTO> findByGroupName(String groupName) {
+        Optional<Groups> entityOptional = groupsRepository.findByGroupName(groupName);
+        if (entityOptional.isEmpty()) {
+            return new ResponseDTO<>(false, "Group is not found!", null);
+        }
+        GroupsDTO groupsDTO = MapperGroupsImpl.toDto(entityOptional.get());
+        return new ResponseDTO<>(true, "OK", groupsDTO);
     }
 
     @Override
     public void delete(Long id) {
         log.debug("Request to delete Groups : {}", id);
+        //        groupsRepository.deleteFromRelTask(id);
         groupsRepository.deleteById(id);
     }
 }
