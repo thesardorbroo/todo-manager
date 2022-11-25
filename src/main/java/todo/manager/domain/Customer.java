@@ -101,10 +101,14 @@ public class Customer implements Serializable {
     }
 
     // prettier-ignore
+
     @Override
     public String toString() {
         return "Customer{" +
-            "id=" + getId() +
-            "}";
+            "id=" + id +
+            ", user=" + user +
+            ", group=" + group +
+            ", todo=" + todo +
+            '}';
     }
 }

@@ -48,4 +48,9 @@ public class ResponseDTO<T> {
     public void setData(T data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "ResponseDTO{" + "success=" + success + ", message='" + message + '\'' + ", data=" + data + '}';
+    }
 }

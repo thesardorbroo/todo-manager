@@ -19,8 +19,9 @@
       },
       "id": "ID",
       "createdAt": "Created At",
-      "customers": "Customers",
-      "tasks": "Tasks"
+      "none": "None",
+      "task": "Task",
+      "customer": "Customer"
     }
   }
 }

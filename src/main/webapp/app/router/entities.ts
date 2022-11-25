@@ -27,6 +27,18 @@ const Comments = () => import('@/entities/comments/comments.vue');
 const CommentsUpdate = () => import('@/entities/comments/comments-update.vue');
 // prettier-ignore
 const CommentsDetails = () => import('@/entities/comments/comments-details.vue');
+// prettier-ignore
+const TodoList = () => import('@/entities/todo-list/todo-list.vue');
+// prettier-ignore
+const TodoListUpdate = () => import('@/entities/todo-list/todo-list-update.vue');
+// prettier-ignore
+const TodoListDetails = () => import('@/entities/todo-list/todo-list-details.vue');
+// prettier-ignore
+const Todo = () => import('@/entities/todo/todo.vue');
+// prettier-ignore
+const TodoUpdate = () => import('@/entities/todo/todo-update.vue');
+// prettier-ignore
+const TodoDetails = () => import('@/entities/todo/todo-details.vue');
 // jhipster-needle-add-entity-to-router-import - JHipster will import entities to the router here
 
 export default {
@@ -127,6 +139,54 @@ export default {
       path: 'comments/:commentsId/view',
       name: 'CommentsView',
       component: CommentsDetails,
+      meta: { authorities: [Authority.USER] },
+    },
+    {
+      path: 'todo-list',
+      name: 'TodoList',
+      component: TodoList,
+      meta: { authorities: [Authority.USER] },
+    },
+    {
+      path: 'todo-list/new',
+      name: 'TodoListCreate',
+      component: TodoListUpdate,
+      meta: { authorities: [Authority.USER] },
+    },
+    {
+      path: 'todo-list/:todoListId/edit',
+      name: 'TodoListEdit',
+      component: TodoListUpdate,
+      meta: { authorities: [Authority.USER] },
+    },
+    {
+      path: 'todo-list/:todoListId/view',
+      name: 'TodoListView',
+      component: TodoListDetails,
+      meta: { authorities: [Authority.USER] },
+    },
+    {
+      path: 'todo',
+      name: 'Todo',
+      component: Todo,
+      meta: { authorities: [Authority.USER] },
+    },
+    {
+      path: 'todo/new',
+      name: 'TodoCreate',
+      component: TodoUpdate,
+      meta: { authorities: [Authority.USER] },
+    },
+    {
+      path: 'todo/:todoId/edit',
+      name: 'TodoEdit',
+      component: TodoUpdate,
+      meta: { authorities: [Authority.USER] },
+    },
+    {
+      path: 'todo/:todoId/view',
+      name: 'TodoView',
+      component: TodoDetails,
       meta: { authorities: [Authority.USER] },
     },
     // jhipster-needle-add-entity-to-router - JHipster will add entities to the router here

@@ -11,6 +11,8 @@
         "customer": "Customer",
         "task": "Task",
         "comments": "Comments",
+        "todoList": "Todo List",
+        "todo": "Todo",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

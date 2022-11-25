@@ -25,6 +25,9 @@
           <tr>
             <th scope="row"><span v-text="$t('global.field.id')">ID</span></th>
             <th scope="row"><span v-text="$t('managerApp.todo.createdAt')">Created At</span></th>
+            <th scope="row"><span v-text="$t('managerApp.todo.none')">None</span></th>
+            <th scope="row"><span v-text="$t('managerApp.todo.task')">Task</span></th>
+            <th scope="row"><span v-text="$t('managerApp.todo.customer')">Customer</span></th>
             <th scope="row"></th>
           </tr>
         </thead>
@@ -34,6 +37,17 @@
               <router-link :to="{ name: 'TodoView', params: { todoId: todo.id } }">{{ todo.id }}</router-link>
             </td>
             <td>{{ todo.createdAt }}</td>
+            <td>{{ todo.none }}</td>
+            <td>
+              <div v-if="todo.task">
+                <router-link :to="{ name: 'TaskView', params: { taskId: todo.task.id } }">{{ todo.task.id }}</router-link>
+              </div>
+            </td>
+            <td>
+              <div v-if="todo.customer">
+                <router-link :to="{ name: 'CustomerView', params: { customerId: todo.customer.id } }">{{ todo.customer.id }}</router-link>
+              </div>
+            </td>
             <td class="text-right">
               <div class="btn-group">
                 <router-link :to="{ name: 'TodoView', params: { todoId: todo.id } }" custom v-slot="{ navigate }">

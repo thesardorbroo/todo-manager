@@ -33,7 +33,7 @@ describe('Service Tests', () => {
     beforeEach(() => {
       service = new TodoService();
       currentDate = new Date();
-      elemDefault = new Todo(123, currentDate);
+      elemDefault = new Todo(123, currentDate, false);
     });
 
     describe('Service methods', () => {
@@ -97,6 +97,7 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             createdAt: dayjs(currentDate).format(DATE_FORMAT),
+            none: true,
           },
           elemDefault
         );
@@ -126,7 +127,12 @@ describe('Service Tests', () => {
       });
 
       it('should partial update a Todo', async () => {
-        const patchObject = Object.assign({}, new Todo());
+        const patchObject = Object.assign(
+          {
+            none: true,
+          },
+          new Todo()
+        );
         const returnedFromService = Object.assign(patchObject, elemDefault);
 
         const expected = Object.assign(
@@ -157,6 +163,7 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             createdAt: dayjs(currentDate).format(DATE_FORMAT),
+            none: true,
           },
           elemDefault
         );

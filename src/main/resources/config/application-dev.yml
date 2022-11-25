@@ -39,6 +39,8 @@ spring:
       poolName: Hikari
       auto-commit: false
   jpa:
+    hibernate:
+      ddl-auto: none
     database-platform: tech.jhipster.domain.util.FixedPostgreSQL10Dialect
     show-sql: true
   liquibase:

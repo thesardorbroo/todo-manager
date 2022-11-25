@@ -1,150 +1,177 @@
 package todo.manager.service.impl;
 
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import todo.manager.domain.Customer;
 import todo.manager.domain.Task;
 import todo.manager.domain.Todo;
+import todo.manager.repository.TaskRepository;
 import todo.manager.repository.TodoRepository;
-import todo.manager.service.*;
+import todo.manager.service.CustomerService;
+import todo.manager.service.GroupsService;
+import todo.manager.service.TaskService;
+import todo.manager.service.TodoService;
 import todo.manager.service.dto.*;
-import todo.manager.service.mapper.CustomerMapper;
-import todo.manager.service.mapper.TaskMapper;
-import todo.manager.service.mapper.impl.MapperTodoImpl;
-import todo.manager.service.validation.GroupValidator;
-import todo.manager.web.rest.errors.GroupsExceptions;
-import todo.manager.web.rest.errors.TaskException;
-import todo.manager.web.rest.errors.TodoExceptions;
+import todo.manager.service.mapper.TodoMapper;
+import todo.manager.service.mapper.impl.MapperTaskImpl;
 
+/**
+ * Service Implementation for managing {@link Todo}.
+ */
 @Service
+@Transactional
 public class TodoServiceImpl implements TodoService {
+
+    private final Logger log = LoggerFactory.getLogger(TodoServiceImpl.class);
 
     private final TodoRepository todoRepository;
 
-    private final TaskService taskService;
+    private final TodoMapper todoMapper;
 
     private final CustomerService customerService;
 
-    private final TaskMapper taskMapper;
-    private final CustomerMapper customerMapper;
-    private final UserService userService;
-    private final GroupValidator groupValidator;
-
     private final GroupsService groupsService;
+
+    private final TaskRepository taskRepository;
 
     public TodoServiceImpl(
         TodoRepository todoRepository,
-        TaskService taskService,
+        TodoMapper todoMapper,
         CustomerService customerService,
-        TaskMapper taskMapper,
-        CustomerMapper customerMapper,
-        UserService userService,
-        GroupValidator groupValidator,
-        GroupsService groupsService
+        GroupsService groupsService,
+        TaskRepository taskRepository
     ) {
         this.todoRepository = todoRepository;
-        this.taskService = taskService;
+        this.todoMapper = todoMapper;
         this.customerService = customerService;
-        this.taskMapper = taskMapper;
-        this.customerMapper = customerMapper;
-        this.userService = userService;
-        this.groupValidator = groupValidator;
         this.groupsService = groupsService;
+        this.taskRepository = taskRepository;
     }
 
     @Override
-    public ResponseDTO<TodoDTO> add(Long taskId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Todo> todoOptional = todoRepository.findByTaskId(taskId);
-        if (todoOptional.isPresent()) {
-            //            throw TodoExceptions.alreadyExists();
-            return null;
+    public TodoDTO save(TodoDTO todoDTO) {
+        log.debug("Request to save Todo : {}", todoDTO);
+        Todo todo = todoMapper.toEntity(todoDTO);
+        todo = todoRepository.save(todo);
+        return todoMapper.toDto(todo);
+    }
+
+    @Override
+    public TodoDTO update(TodoDTO todoDTO) {
+        log.debug("Request to update Todo : {}", todoDTO);
+        Todo todo = todoMapper.toEntity(todoDTO);
+        todo = todoRepository.save(todo);
+        return todoMapper.toDto(todo);
+    }
+
+    @Override
+    public Optional<TodoDTO> partialUpdate(TodoDTO todoDTO) {
+        log.debug("Request to partially update Todo : {}", todoDTO);
+
+        return todoRepository
+            .findById(todoDTO.getId())
+            .map(existingTodo -> {
+                todoMapper.partialUpdate(existingTodo, todoDTO);
+
+                return existingTodo;
+            })
+            .map(todoRepository::save)
+            .map(todoMapper::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TodoDTO> findAll() {
+        log.debug("Request to get all Todos");
+        return todoRepository.findAll().stream().map(todoMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<TodoDTO> findOne(Long id) {
+        log.debug("Request to get Todo : {}", id);
+        return todoRepository.findById(id).map(todoMapper::toDto);
+    }
+
+    @Override
+    public ResponseDTO<List<CustomerResultDTO>> getResultsOnPercent(Long groupId) {
+        Optional<GroupsDTO> groupsOptional = groupsService.findOne(groupId);
+        if (groupsOptional.isEmpty()) {
+            return new ResponseDTO<>(false, "Tasks are not found, ID of group is invalid!", null);
+        }
+        GroupsDTO group = groupsOptional.get();
+        List<CustomerDTO> customers = customerService.getCustomerByGroupId(groupId);
+        List<CustomerResultDTO> customerResults = new ArrayList<>();
+        for (CustomerDTO customer : customers) {
+            Set<TaskDTO> tasks = group.getTasks();
+            Set<Long> customerTasksIds = todoRepository.findIdByCustomerId(customer.getId());
+
+            int count = 0;
+            List<TaskResultDTO> taskResults = new ArrayList<>();
+            for (TaskDTO task : tasks) {
+                boolean isDone = customerTasksIds.contains(task.getId());
+                count += isDone ? 1 : 0;
+                taskResults.add(new TaskResultDTO(task, isDone));
+            }
+
+            CustomerResultDTO customerResult = new CustomerResultDTO();
+            customerResult.setCustomer(customer);
+            customerResult.setTasksCount(tasks.size());
+            customerResult.setTasks(taskResults);
+            customerResult.setDone(count);
+            //            customerResult.setPercent((100 / (tasks.size() - count)));
+            customerResults.add(customerResult);
         }
 
-        Optional<TaskDTO> taskOptional = taskService.findOne(taskId);
+        return new ResponseDTO<>(true, "OK", customerResults);
+    }
+
+    @Override
+    public void delete(Long id) {
+        log.debug("Request to delete Todo : {}", id);
+        todoRepository.deleteById(id);
+    }
+
+    @Override
+    public ResponseDTO<TodoDTO> mark(Long taskId) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<CustomerDTO> customerOptional = customerService.findOneByUserLogin(user.getUsername());
-
-        if (taskOptional.isEmpty()) {
-            //            throw TaskException.notFound();
-            return null;
+        if (customerOptional.isEmpty()) {
+            return new ResponseDTO<>(false, "User is not found!", null);
         }
-        Task task = taskOptional.map(taskMapper::toEntity).get();
-        Customer customer = customerOptional.map(customerMapper::toEntity).get();
+        CustomerDTO customer = customerOptional.get();
+        Long isTaskMarked = todoRepository.isTaskMarked(taskId, customer.getId());
+        if (isTaskMarked != null) {
+            return new ResponseDTO<>(false, "Task is already marked!", null);
+        }
 
-        Todo entity = new Todo(null, customer, task, new Date());
+        TaskDTO customerTask = null;
+        //        Set<TaskDTO> notMarkedTasks =
+        //            todoRepository.findTaskByCustomerId(customer.getId())
+        //                .stream().map(MapperTaskImpl::toDtoWithoutGroups).collect(Collectors.toSet());
+        for (TaskDTO task : customer.getGroup().getTasks()) {
+            if (task.getId().equals(taskId)) {
+                customerTask = task;
+                break;
+            }
+        }
+        if (customerTask == null) {
+            return new ResponseDTO<>(false, "\"Task ID\" is invalid!", null);
+        }
+        TodoDTO todoDTO = new TodoDTO();
+        todoDTO.setTask(customerTask);
+        todoDTO.setCustomer(customer);
+        todoDTO.setNone(true);
+        todoDTO.setCreatedAt(LocalDate.now());
 
+        Todo entity = todoMapper.toEntity(todoDTO);
         todoRepository.save(entity);
-        return new ResponseDTO<>(true, "OK", MapperTodoImpl.toDTO(entity));
-    }
-
-    @Transactional
-    @Override
-    public ResponseDTO<List<CustomerResultDTO>> result(Long groupId) {
-        String searchingResult = findGroup(groupId);
-        if (!searchingResult.equals("FOUND")) {
-            return new ResponseDTO<>(false, searchingResult, null);
-        }
-        List<TaskDTO> taskDTOS = taskService.getTasksByGroupId(groupId);
-        List<CustomerDTO> customerDTOS = customerService.getCustomerByGroupId(groupId);
-
-        List<CustomerResultDTO> results = new ArrayList<>();
-
-        for (CustomerDTO customerDTO : customerDTOS) {
-            List<Integer> taskIds = todoRepository.getTaskIdByCustomerId(customerDTO.getId());
-
-            CustomerResultDTO dto = new CustomerResultDTO();
-            dto.setCustomer(customerDTO);
-            dto.setDone(taskIds.size());
-            dto.setTasksCount(taskDTOS.size());
-
-            if (taskIds.size() != 0 && taskDTOS.size() != 0) {
-                dto.setPercent((100 / (taskDTOS.size() / taskIds.size())) * 1.0);
-            } else {
-                dto.setPercent(0.0);
-            }
-
-            List<TaskResultDTO> tasksResult = new ArrayList<>();
-            for (TaskDTO t : taskDTOS) {
-                boolean value = taskIds.contains(t.getId().intValue());
-                tasksResult.add(new TaskResultDTO(t, value));
-            }
-
-            dto.setTasks(tasksResult);
-            results.add(dto);
-        }
-
-        return new ResponseDTO<>(true, "OK", results);
-    }
-
-    @Override
-    public ResponseDTO<CustomerTasksDTO> tasks() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        CustomerDTO customerDTO = customerService.findOneByUserLogin(user.getUsername()).get();
-
-        if (customerDTO.getGroup() == null) {
-            return new ResponseDTO<>(false, "You are not attached to some group!", null);
-        }
-
-        List<TaskDTO> tasks = taskService.completedTasks(customerDTO.getId());
-        List<TaskDTO> taskDTOS = taskService.notCompletedTasks(customerDTO.getId());
-
-        CustomerTasksDTO dto = new CustomerTasksDTO();
-        dto.setCompletedTasks(tasks);
-        dto.setNotCompleted(taskDTOS);
-
-        ResponseDTO<CustomerTasksDTO> responseDTO = new ResponseDTO<>(true, "OK", dto);
-
-        return responseDTO;
-    }
-
-    private String findGroup(Long groupId) {
-        if (groupId == null) {
-            return "Group id is null!";
-        }
-        Optional<GroupsDTO> optional = groupsService.findOne(groupId);
-        return optional.isPresent() ? "FOUND" : "NOT FOUND";
+        return new ResponseDTO<>(true, "OK", todoMapper.toDto(entity));
     }
 }

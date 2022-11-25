@@ -12,6 +12,28 @@
           <dd>
             <span>{{ todo.createdAt }}</span>
           </dd>
+          <dt>
+            <span v-text="$t('managerApp.todo.none')">None</span>
+          </dt>
+          <dd>
+            <span>{{ todo.none }}</span>
+          </dd>
+          <dt>
+            <span v-text="$t('managerApp.todo.task')">Task</span>
+          </dt>
+          <dd>
+            <div v-if="todo.task">
+              <router-link :to="{ name: 'TaskView', params: { taskId: todo.task.id } }">{{ todo.task.id }}</router-link>
+            </div>
+          </dd>
+          <dt>
+            <span v-text="$t('managerApp.todo.customer')">Customer</span>
+          </dt>
+          <dd>
+            <div v-if="todo.customer">
+              <router-link :to="{ name: 'CustomerView', params: { customerId: todo.customer.id } }">{{ todo.customer.id }}</router-link>
+            </div>
+          </dd>
         </dl>
         <button type="submit" v-on:click.prevent="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
           <font-awesome-icon icon="arrow-left"></font-awesome-icon>&nbsp;<span v-text="$t('entity.action.back')"> Back</span>

@@ -4,22 +4,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.swing.text.html.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import todo.manager.domain.Task;
 import todo.manager.repository.TaskRepository;
+import todo.manager.service.CustomerService;
 import todo.manager.service.TaskService;
-import todo.manager.service.dto.GroupsDTO;
-import todo.manager.service.dto.ResponseDTO;
-import todo.manager.service.dto.TaskDTO;
+import todo.manager.service.dto.*;
 import todo.manager.service.mapper.TaskMapper;
 import todo.manager.service.mapper.impl.MapperTaskImpl;
 import todo.manager.service.validation.GroupValidator;
-import todo.manager.web.rest.errors.CustomerExceptions;
 
 /**
  * Service Implementation for managing {@link Task}.
@@ -35,10 +36,18 @@ public class TaskServiceImpl implements TaskService {
 
     private final GroupValidator groupValidator;
 
-    public TaskServiceImpl(TaskRepository taskRepository, TaskMapper taskMapper, GroupValidator groupValidator) {
+    private final CustomerService customerService;
+
+    public TaskServiceImpl(
+        TaskRepository taskRepository,
+        TaskMapper taskMapper,
+        GroupValidator groupValidator,
+        CustomerService customerService
+    ) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
         this.groupValidator = groupValidator;
+        this.customerService = customerService;
     }
 
     @Override
@@ -103,6 +112,78 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskDTO> findAll() {
         log.debug("Request to get all Tasks");
         return taskRepository.findAll().stream().map(MapperTaskImpl::toDto).collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Override
+    public ResponseDTO<CustomerTasksDTO> getOnlyOwnTasks() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user == null) {
+            return new ResponseDTO<>(false, "User is not found!", null);
+        }
+        Optional<CustomerDTO> customerDTOOptional = customerService.findOneByUserLogin(user.getUsername());
+        if (customerDTOOptional.isEmpty()) {
+            return new ResponseDTO<>(false, "You have not group!", null);
+        }
+        CustomerDTO currentUser = customerDTOOptional.get();
+        CustomerTasksDTO customerTasks = getUserTasks(currentUser);
+        return new ResponseDTO<>(true, "OK", customerTasks);
+    }
+
+    private CustomerTasksDTO getUserTasks(CustomerDTO customer) {
+        List<TaskDTO> completed = taskRepository
+            .getCompletedTasks(customer.getId())
+            .stream()
+            .map(MapperTaskImpl::toDto)
+            .collect(Collectors.toList());
+
+        List<TaskDTO> notCompleted = taskRepository
+            .getNotCompletedTasks(customer.getId())
+            .stream()
+            .map(MapperTaskImpl::toDto)
+            .collect(Collectors.toList());
+
+        CustomerTasksDTO customerTasks = new CustomerTasksDTO();
+        customerTasks.setCompletedTasks(completed);
+        customerTasks.setNotCompleted(notCompleted);
+        return customerTasks;
+    }
+
+    @Override
+    public ResponseDTO<CustomerTasksDTO> getCustomerTasks(String login, Long id) {
+        log.debug("Admin going to get tasks of User");
+        CustomerDTO customerDTO = null;
+        if (login != null && id == null) {
+            // Todo: Login is not null but ID is null! Find by login.
+            Optional<CustomerDTO> customerOptional = customerService.findOneByUserLogin(login);
+            if (customerOptional.isEmpty()) {
+                // Todo: Return ResponseDTO with message "User is not found, Login is invalid!";
+                return new ResponseDTO<>(false, "User is not found, Login is invalid!", null);
+            }
+            customerDTO = customerOptional.get();
+        } else if (login == null && id != null) {
+            // Todo: Login is null but ID is not null! Find by id.
+            Optional<CustomerDTO> customerOptional = customerService.findOneByUserId(id);
+            if (customerOptional.isEmpty()) {
+                // Todo: Return ResponseDTO with message "User is not found, ID is invalid!";
+                return new ResponseDTO<>(false, "User is not found, ID is invalid!", null);
+            }
+            customerDTO = customerOptional.get();
+        } else {
+            Optional<CustomerDTO> customerOptional = customerService.findOneByLoginAndId(login, id);
+            if (customerOptional.isEmpty()) {
+                //Todo: Return ResponseDTO with message "Login and ID was not belong to one User!";
+                return new ResponseDTO<>(false, "Login and ID was not belong to one User!", null);
+            }
+            customerDTO = customerOptional.get();
+        }
+        CustomerTasksDTO customerTasks = getUserTasks(customerDTO);
+        log.debug(
+            "Customer ID: {} | Completed tasks count: {} | Not completed tasks count: {}",
+            customerDTO.getId(),
+            customerTasks.getCompletedTasks().size(),
+            customerTasks.getNotCompleted().size()
+        );
+        return new ResponseDTO<>(true, "OK", customerTasks);
     }
 
     public Page<TaskDTO> findAllWithEagerRelationships(Pageable pageable) {

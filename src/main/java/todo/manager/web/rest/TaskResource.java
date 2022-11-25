@@ -16,6 +16,8 @@ import tech.jhipster.web.util.ResponseUtil;
 import todo.manager.repository.TaskRepository;
 import todo.manager.security.AuthoritiesConstants;
 import todo.manager.service.TaskService;
+import todo.manager.service.dto.CustomerResultDTO;
+import todo.manager.service.dto.CustomerTasksDTO;
 import todo.manager.service.dto.ResponseDTO;
 import todo.manager.service.dto.TaskDTO;
 import todo.manager.web.rest.errors.BadRequestAlertException;
@@ -139,6 +141,25 @@ public class TaskResource {
     public List<TaskDTO> getAllTasks(@RequestParam(required = false, defaultValue = "false") boolean eagerload) {
         log.debug("REST request to get all Tasks");
         return taskService.findAll();
+    }
+
+    @GetMapping("/mine-tasks")
+    public ResponseDTO<CustomerTasksDTO> getOnlyMineTasks() {
+        log.debug("REST request to get only own Tasks");
+        ResponseDTO<CustomerTasksDTO> response = taskService.getOnlyOwnTasks();
+        log.debug("Customer's tasks are returning, Response: {}", response);
+        return response;
+    }
+
+    @GetMapping("/junior-tasks")
+    public ResponseDTO<CustomerTasksDTO> getCustomerTasks(
+        @RequestParam(required = false) Long id,
+        @RequestParam(required = false) String login
+    ) {
+        if (id == null && login == null) {
+            return new ResponseDTO<CustomerTasksDTO>(false, "Parameters are not given! Give parameter id or login.", null);
+        }
+        return taskService.getCustomerTasks(login, id);
     }
 
     /**

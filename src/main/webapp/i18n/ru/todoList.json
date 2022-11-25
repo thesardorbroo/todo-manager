@@ -1,0 +1,25 @@
+{
+  "managerApp": {
+    "todoList": {
+      "home": {
+        "title": "Todo Lists",
+        "refreshListLabel": "Обновить список",
+        "createLabel": "Создать новый Todo List",
+        "createOrEditLabel": "Создать или отредактировать Todo List",
+        "notFound": "Todo Lists не найдено"
+      },
+      "created": "Новый Todo List создан с идентификатором {{ param }}",
+      "updated": "Todo List обновлен с идентификатором {{ param }}",
+      "deleted": "Todo List удален с идентификатором {{ param }}",
+      "delete": {
+        "question": "Вы уверены что хотите удалить Todo List {{ id }}?"
+      },
+      "detail": {
+        "title": "Todo List"
+      },
+      "id": "ID",
+      "createdAt": "Created At",
+      "none": "None"
+    }
+  }
+}

@@ -9,9 +9,9 @@ import TodoUpdateComponent from '@/entities/todo/todo-update.vue';
 import TodoClass from '@/entities/todo/todo-update.component';
 import TodoService from '@/entities/todo/todo.service';
 
-import CustomerService from '@/entities/customer/customer.service';
-
 import TaskService from '@/entities/task/task.service';
+
+import CustomerService from '@/entities/customer/customer.service';
 import AlertService from '@/shared/alert/alert.service';
 
 const localVue = createLocalVue();
@@ -46,13 +46,13 @@ describe('Component Tests', () => {
           todoService: () => todoServiceStub,
           alertService: () => new AlertService(),
 
-          customerService: () =>
-            sinon.createStubInstance<CustomerService>(CustomerService, {
+          taskService: () =>
+            sinon.createStubInstance<TaskService>(TaskService, {
               retrieve: sinon.stub().resolves({}),
             } as any),
 
-          taskService: () =>
-            sinon.createStubInstance<TaskService>(TaskService, {
+          customerService: () =>
+            sinon.createStubInstance<CustomerService>(CustomerService, {
               retrieve: sinon.stub().resolves({}),
             } as any),
         },

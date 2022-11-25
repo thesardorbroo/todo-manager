@@ -124,6 +124,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Optional<CustomerDTO> findOneByUserLogin(String login) {
         Optional<Customer> optional = customerRepository.getByUserLogin(login);
+        List<Customer> customers = customerRepository.findAll();
+        customers.forEach(System.out::println);
         if (optional.isPresent()) {
             Customer customer = optional.get();
             UserDTO userDTO = MapperUserImpl.toDto(customer.getUser());
@@ -138,6 +140,21 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<CustomerDTO> findOneByUserId(Long userId) {
+        if (userId == null) {
+            return Optional.empty();
+        }
+        Optional<Customer> customerOptional = customerRepository.findByUserId(userId);
+        return customerOptional.isEmpty() ? Optional.empty() : Optional.of(customerOptional.map(MapperCustomerImpl::toDTO).get());
+    }
+
+    @Override
+    public Optional<CustomerDTO> findOneByLoginAndId(String login, Long userId) {
+        Optional<Customer> customerOptional = customerRepository.findByUserIdAndUserLogin(userId, login);
+        return customerOptional.isEmpty() ? Optional.empty() : Optional.of(customerOptional.map(MapperCustomerImpl::toDTO).get());
     }
 
     @Override

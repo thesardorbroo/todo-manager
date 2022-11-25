@@ -3,48 +3,55 @@ package todo.manager.service.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import java.util.Date;
-import java.util.Set;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Objects;
 
-@JsonPropertyOrder(value = { "id", "customer", "task", "createdAt" })
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class TodoDTO {
+/**
+ * A DTO for the {@link todo.manager.domain.Todo} entity.
+ */
+@SuppressWarnings("common-java:DuplicatedBlocks")
+@JsonPropertyOrder({ "id", "createdAt", "none", "task", "customer" })
+@JsonIgnoreProperties(value = { "createdAt" }, ignoreUnknown = true, allowSetters = true)
+public class TodoDTO implements Serializable {
 
     @JsonProperty("id")
-    private Integer id;
+    private Long id;
 
-    @JsonProperty("customer")
-    private CustomerDTO customer;
+    //    @JsonProperty("createdAt")
+    private LocalDate createdAt;
+
+    @JsonProperty("none")
+    private Boolean none;
 
     @JsonProperty("task")
     private TaskDTO task;
 
-    @JsonProperty("createdAt")
-    private Date createdAt;
+    @JsonProperty("customer")
+    private CustomerDTO customer;
 
-    public TodoDTO() {}
-
-    public TodoDTO(Integer id, CustomerDTO customer, TaskDTO task, Date createdAt) {
-        this.id = id;
-        this.customer = customer;
-        this.task = task;
-        this.createdAt = createdAt;
-    }
-
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public CustomerDTO getCustomer() {
-        return customer;
+    public LocalDate getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCustomer(CustomerDTO customer) {
-        this.customer = customer;
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Boolean getNone() {
+        return none;
+    }
+
+    public void setNone(Boolean none) {
+        this.none = none;
     }
 
     public TaskDTO getTask() {
@@ -55,11 +62,44 @@ public class TodoDTO {
         this.task = task;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public CustomerDTO getCustomer() {
+        return customer;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setCustomer(CustomerDTO customer) {
+        this.customer = customer;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TodoDTO)) {
+            return false;
+        }
+
+        TodoDTO todoDTO = (TodoDTO) o;
+        if (this.id == null) {
+            return false;
+        }
+        return Objects.equals(this.id, todoDTO.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id);
+    }
+
+    // prettier-ignore
+    @Override
+    public String toString() {
+        return "TodoDTO{" +
+            "id=" + getId() +
+            ", createdAt='" + getCreatedAt() + "'" +
+            ", none='" + getNone() + "'" +
+            ", task=" + getTask() +
+            ", customer=" + getCustomer() +
+            "}";
     }
 }

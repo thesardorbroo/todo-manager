@@ -1,63 +1,133 @@
 package todo.manager.domain;
 
-import java.util.Date;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
+import java.time.LocalDate;
 import javax.persistence.*;
 
+/**
+ * A Todo.
+ */
 @Entity
 @Table(name = "todo_list")
-public class Todo {
+@SuppressWarnings("common-java:DuplicatedBlocks")
+public class Todo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "created_at")
+    private LocalDate createdAt;
+
+    @Column(name = "none")
+    private Boolean none;
 
     @ManyToOne
-    private Customer customer;
-
-    @ManyToOne
+    @JsonIgnoreProperties(value = { "comments", "groups" }, allowSetters = true)
     private Task task;
 
-    private Date createdAt;
+    @ManyToOne
+    @JsonIgnoreProperties(value = { "user", "group" }, allowSetters = true)
+    private Customer customer;
 
-    public Todo() {}
+    // jhipster-needle-entity-add-field - JHipster will add fields here
 
-    public Todo(Integer id, Customer customer, Task task, Date createdAt) {
+    public Long getId() {
+        return this.id;
+    }
+
+    public Todo id(Long id) {
+        this.setId(id);
+        return this;
+    }
+
+    public void setId(Long id) {
         this.id = id;
-        this.customer = customer;
-        this.task = task;
+    }
+
+    public LocalDate getCreatedAt() {
+        return this.createdAt;
+    }
+
+    public Todo createdAt(LocalDate createdAt) {
+        this.setCreatedAt(createdAt);
+        return this;
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Integer getId() {
-        return id;
+    public Boolean getNone() {
+        return this.none;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public Todo none(Boolean none) {
+        this.setNone(none);
+        return this;
     }
 
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setNone(Boolean none) {
+        this.none = none;
     }
 
     public Task getTask() {
-        return task;
+        return this.task;
     }
 
     public void setTask(Task task) {
         this.task = task;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public Todo task(Task task) {
+        this.setTask(task);
+        return this;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public Customer getCustomer() {
+        return this.customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Todo customer(Customer customer) {
+        this.setCustomer(customer);
+        return this;
+    }
+
+    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Todo)) {
+            return false;
+        }
+        return id != null && id.equals(((Todo) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
+    }
+
+    // prettier-ignore
+    @Override
+    public String toString() {
+        return "Todo{" +
+            "id=" + getId() +
+            ", createdAt='" + getCreatedAt() + "'" +
+            ", none='" + getNone() + "'" +
+            "}";
     }
 }

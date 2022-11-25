@@ -13,10 +13,16 @@ import todo.manager.domain.Customer;
 @SuppressWarnings("unused")
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-    @Query("SELECT c FROM Customer c WHERE c.user.login = :login")
-    Optional<Customer> getByUserLogin(@Param("login") String login);
+    Optional<Customer> findByUserLogin(String login);
+
+    @Query("SELECT c FROM Customer c WHERE c.user.login = ?1")
+    Optional<Customer> getByUserLogin(String login);
 
     Optional<List<Customer>> findAllByGroupId(Long groupId);
+
+    Optional<Customer> findByUserId(Long userId);
+
+    Optional<Customer> findByUserIdAndUserLogin(Long userId, String login);
 
     void deleteByGroupId(Long id);
 }

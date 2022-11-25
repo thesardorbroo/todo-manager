@@ -42,6 +42,44 @@
               />
             </b-input-group>
           </div>
+          <div class="form-group">
+            <label class="form-control-label" v-text="$t('managerApp.todo.none')" for="todo-none">None</label>
+            <input
+              type="checkbox"
+              class="form-check"
+              name="none"
+              id="todo-none"
+              data-cy="none"
+              :class="{ valid: !$v.todo.none.$invalid, invalid: $v.todo.none.$invalid }"
+              v-model="$v.todo.none.$model"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-control-label" v-text="$t('managerApp.todo.task')" for="todo-task">Task</label>
+            <select class="form-control" id="todo-task" data-cy="task" name="task" v-model="todo.task">
+              <option v-bind:value="null"></option>
+              <option
+                v-bind:value="todo.task && taskOption.id === todo.task.id ? todo.task : taskOption"
+                v-for="taskOption in tasks"
+                :key="taskOption.id"
+              >
+                {{ taskOption.id }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-control-label" v-text="$t('managerApp.todo.customer')" for="todo-customer">Customer</label>
+            <select class="form-control" id="todo-customer" data-cy="customer" name="customer" v-model="todo.customer">
+              <option v-bind:value="null"></option>
+              <option
+                v-bind:value="todo.customer && customerOption.id === todo.customer.id ? todo.customer : customerOption"
+                v-for="customerOption in customers"
+                :key="customerOption.id"
+              >
+                {{ customerOption.id }}
+              </option>
+            </select>
+          </div>
         </div>
         <div>
           <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" v-on:click="previousState()">

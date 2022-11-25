@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import todo.manager.service.dto.ResponseDTO;
-import todo.manager.service.dto.TaskDTO;
+import todo.manager.service.dto.*;
 
 /**
  * Service Interface for managing {@link todo.manager.domain.Task}.
@@ -41,6 +40,10 @@ public interface TaskService {
      * @return the list of entities.
      */
     List<TaskDTO> findAll();
+
+    ResponseDTO<CustomerTasksDTO> getOnlyOwnTasks();
+
+    ResponseDTO<CustomerTasksDTO> getCustomerTasks(String login, Long id);
 
     /**
      * Get all the tasks with eager load of many-to-many relationships.

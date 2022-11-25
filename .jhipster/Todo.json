@@ -3,11 +3,15 @@
   "changelogDate": "20221116131213",
   "dto": "mapstruct",
   "embedded": false,
-  "entityTableName": "todo",
+  "entityTableName": "todo_list",
   "fields": [
     {
       "fieldName": "createdAt",
       "fieldType": "LocalDate"
+    },
+    {
+      "fieldName": "none",
+      "fieldType": "Boolean"
     }
   ],
   "fluentMethods": true,
@@ -17,16 +21,16 @@
   "readOnly": false,
   "relationships": [
     {
-      "otherEntityName": "customer",
-      "otherEntityRelationshipName": "todo",
-      "relationshipName": "customers",
-      "relationshipType": "one-to-many"
+      "otherEntityField": "id",
+      "otherEntityName": "task",
+      "relationshipName": "task",
+      "relationshipType": "many-to-one"
     },
     {
-      "otherEntityName": "task",
-      "otherEntityRelationshipName": "todo",
-      "relationshipName": "tasks",
-      "relationshipType": "one-to-many"
+      "otherEntityField": "id",
+      "otherEntityName": "customer",
+      "relationshipName": "customer",
+      "relationshipType": "many-to-one"
     }
   ],
   "service": "serviceImpl"

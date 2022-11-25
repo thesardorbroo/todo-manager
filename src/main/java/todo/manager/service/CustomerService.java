@@ -55,6 +55,10 @@ public interface CustomerService {
      */
 
     Optional<CustomerDTO> findOneByUserLogin(String login);
+    Optional<CustomerDTO> findOneByUserId(Long id);
+
+    Optional<CustomerDTO> findOneByLoginAndId(String login, Long id);
+
     void delete(Long id);
 
     List<CustomerDTO> getCustomerByGroupId(Long groupId);

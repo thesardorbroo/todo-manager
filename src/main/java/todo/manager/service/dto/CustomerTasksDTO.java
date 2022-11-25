@@ -1,10 +1,12 @@
 package todo.manager.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.List;
 
 @JsonPropertyOrder(value = { "completedTasks", "notCompleted" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomerTasksDTO {
 
     @JsonProperty("completedTasks")

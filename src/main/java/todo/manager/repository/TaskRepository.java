@@ -2,10 +2,12 @@ package todo.manager.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
+import org.springframework.scheduling.concurrent.ScheduledExecutorTask;
 import org.springframework.stereotype.Repository;
 import todo.manager.domain.Task;
 
@@ -28,6 +30,9 @@ public interface TaskRepository extends TaskRepositoryWithBagRelationships, JpaR
 
     @Query(value = "SELECT t FROM Task t WHERE t.id NOT IN (SELECT td.task.id FROM Todo td WHERE td.customer.id = :customerId)")
     List<Task> getNotCompletedTasks(@Param("customerId") Long customerId);
+
+    @Query("SELECT t FROM Task t WHERE t.id NOT IN (SELECT td.task.id FROM Todo td WHERE td.customer.id = :customerId)")
+    Set<Task> getNotMarkedTasks(@Param("customerId") Long customerId);
 
     void deleteById(Long id);
 
